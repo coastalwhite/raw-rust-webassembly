@@ -1,0 +1,6 @@
+[workspace]
+members = [
+	"canvas-manipulation",
+	"rust-from-js",
+	"js-from-rust",
+]
