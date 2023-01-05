@@ -56,21 +56,30 @@ fetch("../target/wasm32-unknown-unknown/release/str_exchanging.wasm")
 		const [addr, len] = encode_string(s, module.memory);
 		return module.count_digits(addr, len);
 	}
-	
-	console.log(mod.exports.static_stringy);
-    const str_pos_1 = mod.exports.malloc(8);
-	mod.exports.static_stringy(str_pos_1, str_pos_1 + 4);
-    const str_pos_2 = mod.exports.malloc(8);
-	mod.exports.other_static_stringy(str_pos_2, str_pos_2 + 4);
 
-	const [addr1, len1] = new Int32Array(module.memory.buffer, str_pos_1, 2);
-	const [addr2, len2] = new Int32Array(module.memory.buffer, str_pos_2, 2);
+    function static_stringy() {
+        // 2 * 4 bytes = 8 bytes
+        const ptr = mod.exports.malloc(8);
+	    mod.exports.static_stringy(ptr, ptr + 4);
+        const [addr, len] = new Int32Array(module.memory.buffer, ptr, 2);
+        const s = decode_string(module.memory, addr, len);
+        mod.exports.free(ptr, 8);
+        return s;
+    }
 
-	alert(decode_string(module.memory, addr1, len1));
-	alert(decode_string(module.memory, addr2, len2));
+    function other_static_stringy() {
+        // 2 * 4 bytes = 8 bytes
+        const ptr = mod.exports.malloc(8);
+	    mod.exports.other_static_stringy(ptr, ptr + 4);
+        const [addr, len] = new Int32Array(module.memory.buffer, ptr, 2);
+        const s = decode_string(module.memory, addr, len);
+        mod.exports.free(ptr, 8);
+        return s;
+    }
 
-    mod.exports.free(str_pos_1);
-    mod.exports.free(str_pos_2);
+	alert(static_stringy());
+	alert(other_static_stringy());
+	alert(static_stringy());
 
     const inTextElem = document.getElementById("in_text");
     const answerElem = document.getElementById("answer");
